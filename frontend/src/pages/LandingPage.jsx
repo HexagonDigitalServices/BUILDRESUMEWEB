@@ -4,7 +4,7 @@
                             <div className={landingPageStyles.statsContainer}>
                                 [
                                     { value: '50K+', label: 'Resumes Created', gradient: 'from-violet-600 to-fuchsia-600' },
-                                    { value: '4.9â˜…', label: 'User Rating', gradient: 'from-orange-500 to-red-500' },
+                                    { value: '4.9★', label: 'User Rating', gradient: 'from-orange-500 to-red-500' },
                                     { value: '5 Min', label: 'Build Time', gradient: 'from-emerald-500 to-teal-500' }
                                 ]
     
