@@ -439,9 +439,62 @@ const EditResume = () => {
     }
   }
 
+  const updateSection = (section, key, value) => {
+    setResumeData((prev) => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [key]: value,
+      },
+    }))
+  }
+
+  const updateArrayItem = (section, index, key, value) => {
+    setResumeData((prev) => {
+      const updatedArray = [...prev[section]]
+
+      if (key === null) {
+        updatedArray[index] = value
+      } else {
+        updatedArray[index] = {
+          ...updatedArray[index],
+          [key]: value,
+        }
+      }
+
+      return {
+        ...prev,
+        [section]: updatedArray,
+      }
+    })
+  }
+
+  const addArrayItem = (section, newItem) => {
+    setResumeData((prev) => ({
+      ...prev,
+      [section]: [...prev[section], newItem],
+    }))
+  }
+
+  const removeArrayItem = (section, index) => {
+    setResumeData((prev) => {
+      const updatedArray = [...prev[section]]
+      updatedArray.splice(index, 1)
+      return {
+        ...prev,
+        [section]: updatedArray,
+      }
+    })
+  }
 
   const fetchResumeDetailsById = async () => {
-       
+    try {
+      const response = await axiosInstance.get(API_PATHS.RESUME.GET_BY_ID(resumeId))
+
+      if (response.data && response.data.profileInfo) {
+        const resumeInfo = response.data
+
+        setResumeData((prevState) => ({
           ...prevState,
           title: resumeInfo?.title || "Untitled",
           template: resumeInfo?.template || prevState?.template,
@@ -455,6 +508,11 @@ const EditResume = () => {
           languages: resumeInfo?.languages || prevState?.languages,
           interests: resumeInfo?.interests || prevState?.interests,
         }))
+      }
+    } catch (error) {
+      console.error("Error fetching resume:", error)
+      toast.error("Failed to load resume data")
+    }
   }
 
   const uploadResumeImages = async () => {
@@ -506,7 +564,59 @@ const EditResume = () => {
     }
   }
 
+  const updateResumeDetails = async (thumbnailLink) => {
+    try {
+      setIsLoading(true)
+
+      await axiosInstance.put(API_PATHS.RESUME.UPDATE(resumeId), {
+        ...resumeData,
+        thumbnailLink: thumbnailLink || "",
+        completion: completionPercentage,
+      })
+    } catch (err) {
+      console.error("Error updating resume:", err)
+      toast.error("Failed to update resume details")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleDeleteResume = async () => {
+    try {
+      setIsLoading(true)
+      await axiosInstance.delete(API_PATHS.RESUME.DELETE(resumeId))
+      toast.success("Resume deleted successfully")
+      navigate("/dashboard")
+    } catch (error) {
+      console.error("Error deleting resume:", error)
+      toast.error("Failed to delete resume")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const downloadPDF = async () => {
+    const element = resumeDownloadRef.current;
+    if (!element) {
+      toast.error("Failed to generate PDF. Please try again.");
+      return;
+    }
+  
+    setIsDownloading(true);
+    setDownloadSuccess(false);
+    const toastId = toast.loading("Generating PDFâ€¦");
+  
+    const override = document.createElement("style");
+    override.id = "__pdf_color_override__";
+    override.textContent = `
+      * {
+        color: #000 !important;
+        background-color: #fff !important;
+        border-color: #000 !important;
+      }
+    `;
+    document.head.appendChild(override);
+  
     try {
       await html2pdf()
         .set({
@@ -546,4 +656,18 @@ const EditResume = () => {
     }
   };
 
+  const updateTheme = (theme) => {
+    setResumeData(prev => ({
+      ...prev,
+      template: {
+        theme: theme,
+        colorPalette: []
+      }
+    }));
+  }
 
+  useEffect(() => {
+    if (resumeId) {
+      fetchResumeDetailsById()
+    }
+  }, [resumeId])
