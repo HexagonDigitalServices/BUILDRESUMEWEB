@@ -1,0 +1,49 @@
+/* If the user ever prints from the browser, force A4 exactly */
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+
+  html,
+  body {
+    margin: 0;
+    padding: 0;
+      margin: 0;
+    padding: 0;
+    height: 297mm;
+    width: 210mm;
+  }
+}
+
+/* Make this wrapper at least 210mm × 297mm, but let it shrink if content is shorter */
+ .a4-wrapper {
+    width: 210mm;
+    min-height: 297mm;
+    background: white;
+    box-sizing: border-box;
+    overflow: hidden;
+    page-break-after: always;
+  }
+
+/* Avoid breaking inside headings or custom section titles */
+.a4-wrapper h1,
+.a4-wrapper h2,
+.a4-wrapper h3,
+.a4-wrapper h4,
+.a4-wrapper .section-title {
+  page-break-inside: avoid;
+  break-inside: avoid;
+  page-break-after: avoid;
+}
+
+/* Prevent entire resume sections from splitting */
+.a4-wrapper .resume-section {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+  .section-title, .resume-section {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    page-break-after: avoid;
+  }
